@@ -7,7 +7,7 @@ const ejsMate = require('ejs-mate')
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet  = require('helmet')
 require('dotenv').config()
-const dbUrl = 'mongodb://localhost:27017/yelp-camp'
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'
 
 if(process.env.NODE_ENV !== "production"){
     require('dotenv').config()
@@ -46,6 +46,8 @@ app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname,'public')))
 app.use(mongoSanitize())
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!'
+
 const store = MongoStore.create({
     mongoUrl: dbUrl,
     touchAfter: 24 * 60 * 60,
@@ -53,6 +55,7 @@ const store = MongoStore.create({
         secret: 'thisshouldbeabettersecret!'
     }
 });
+
 
 store.on("error",function(e){
     console.log("SESSION STORE ERROR",e)
@@ -161,7 +164,7 @@ app.use((err,req,res,next)=>{
     if(!err.message) err.message = 'Oh shit smtg wrong'
     res.status(statusCode).render('error',{err})
 })
-
-app.listen(3000,()=>{
-    console.log("PORT 3000 OPEN")
+const port = process.env.PORT || 3000
+app.listen(port,()=>{
+    console.log(`PORT ${port} OPEN`)
 })
